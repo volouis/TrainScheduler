@@ -2,3 +2,7 @@ body{
     margin: auto;
     max-width: 900px;
 }
+
+.btn{
+    margin: 10px;
+}
