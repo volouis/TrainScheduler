@@ -6,8 +6,12 @@ var freq;
 var first;
 var rowNum = 0;
 var keys = [];
+var upKey = 0;
+var upRow;
 
 $(".container").append("<p class=lead style=text-align:center>" + moment().format('LT'));
+$("#upForm").hide();
+$("#updateTitle").hide();
 
 $("#submit").click(function(event) {
     event.preventDefault();
@@ -27,23 +31,9 @@ $("#submit").click(function(event) {
 });
 
 database.ref().on("child_added", function(snap) {
-    var row = $("<tr>");
-    var delBtn = $("<button>");
 
-    delBtn.addClass("btn btn-primary delete");
-    delBtn.text("DELETE");
-    delBtn.attr("type", "button");
-    delBtn.attr("data-row", rowNum);
-
-    row.attr("id", rowNum);   
-    row.append("<td>" + snap.val().trainName);
-    row.append("<td>" + snap.val().destination);
-    row.append("<td>" + snap.val().frequency);
-    row.append("<td>" + arrival(snap.val().trainTime, snap.val().frequency)); 
-    row.append("<td>" + left(snap.val().trainTime, snap.val().frequency)); 
-    row.append(delBtn);
-
-    $("tbody").append(row);  
+    rowCreating(snap.val().trainName, snap.val().destination, snap.val().trainTime, snap.val().frequency);
+  
     rowNum++;
     keys.push(snap.key);
 });
@@ -54,6 +44,65 @@ $(document).on("click","button.delete",function(){
     database.ref(keys[row]).remove();
 });
 
+$(document).on("click","button.update",function(){
+    $("#upForm").show();
+    var row = $(this).attr("data-row");
+    upKey = keys[row];
+    upRow = $(this).attr("data-row");
+});
+
+$("#upSubmit").click(function(event){
+    event.preventDefault();
+
+    var upName = $("#upName").val().trim();
+    var upDest = $("#upDest").val().trim();
+    var upFreq = $("#upFreq").val().trim();
+    var upFirst = $("#upFirst").val().trim();
+
+    database.ref(upKey).update({
+        trainName: upName,
+        destination: upDest,
+        trainTime: upFirst,
+        frequency: upFreq
+    });
+
+    $("#" + upRow).text("");
+
+    rowCreating(upName, upDest, upFirst, upFreq);
+
+    $("#upForm").hide();
+});
+
+function rowCreating(name, place, tim, inter){
+
+    var row = $("<tr>");
+    var con = $("<div>");
+    var delBtn = $("<button>");
+    var upBtn = $("<button>");
+
+    delBtn.addClass("btn btn-secondary delete");
+    delBtn.text("DELETE");
+    delBtn.attr("type", "button");
+    delBtn.attr("data-row", rowNum);
+    con.append(delBtn);
+
+    upBtn.addClass("btn btn-dark update");
+    upBtn.text("UPDATE");
+    upBtn.attr("type", "button");
+    upBtn.attr("data-row", rowNum);
+    con.append(upBtn);
+
+    row.attr("id", rowNum);   
+    row.append("<td>" + name);
+    row.append("<td>" + place);
+    row.append("<td>" + inter);
+    row.append("<td>" + arrival(tim, inter)); 
+    row.append("<td>" + left(tim, inter)); 
+    row.append(con);
+
+    $("tbody").append(row);  
+}
+
 function arrival(d, e){
     var l = left(d, e);
     var c = moment().add(l, "m").format("LT");
@@ -61,7 +110,6 @@ function arrival(d, e){
 }
 
 function left(a, b){
-    var c = moment().format('LT');
     var inter = parseInt(b) * 60;
 
     var d =  parseInt(a.substr(0, 2)) * 3600;
