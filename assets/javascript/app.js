@@ -33,10 +33,8 @@ $("#submit").click(function(event) {
 var intervalId = setInterval(qwe, 1000);
 
 function qwe(){
-    $(".container").empty();
-    $(".container").append("<h1 class=display-4 style=text-align:center>Anytime is Train Time</h1>");
-    $(".container").append("<p class=lead style=text-align:center>Choo Choo. Chee Chee</p>");
-    $(".container").append("<p class=lead style=text-align:center>" + moment().format('LT'));
+
+    $(".leadTime").text(moment().format('LT'));
 
     $("tbody").empty()
     database.ref().on("child_added", function(snap) {
