@@ -8,8 +8,8 @@ var rowNum = 0;
 var keys = [];
 var upKey = 0;
 var upRow;
+var fa;
 
-$(".container").append("<p class=lead style=text-align:center>" + moment().format('LT'));
 $("#upForm").hide();
 $("#updateTitle").hide();
 
@@ -30,13 +30,23 @@ $("#submit").click(function(event) {
     console.log(name + dest + freq + first);
 });
 
-database.ref().on("child_added", function(snap) {
+var intervalId = setInterval(qwe, 1000);
 
-    rowCreating(snap.val().trainName, snap.val().destination, snap.val().trainTime, snap.val().frequency);
-  
-    rowNum++;
-    keys.push(snap.key);
-});
+function qwe(){
+    $(".container").empty();
+    $(".container").append("<h1 class=display-4 style=text-align:center>Anytime is Train Time</h1>");
+    $(".container").append("<p class=lead style=text-align:center>Choo Choo. Chee Chee</p>");
+    $(".container").append("<p class=lead style=text-align:center>" + moment().format('LT'));
+
+    $("tbody").empty()
+    database.ref().on("child_added", function(snap) {
+
+        rowCreating(snap.val().trainName, snap.val().destination, snap.val().trainTime, snap.val().frequency);
+      
+        rowNum++;
+        keys.push(snap.key);
+    });
+}
 
 $(document).on("click","button.delete",function(){
     var row = $(this).attr("data-row");
@@ -49,6 +59,8 @@ $(document).on("click","button.update",function(){
     var row = $(this).attr("data-row");
     upKey = keys[row];
     upRow = $(this).attr("data-row");
+
+    $(".upName").append("<p>" + database.ref().val());
 });
 
 $("#upSubmit").click(function(event){
@@ -96,11 +108,16 @@ function rowCreating(name, place, tim, inter){
     row.append("<td>" + name);
     row.append("<td>" + place);
     row.append("<td>" + inter);
+
+    var timeLeft = Math.ceil(left(tim, inter));
+    // var timeLeft = left(tim, inter);
+
+
     row.append("<td>" + arrival(tim, inter)); 
-    row.append("<td>" + left(tim, inter)); 
+    row.append("<td>" + timeLeft); 
     row.append(con);
 
-    $("tbody").append(row);  
+    $("tbody").append(row);    
 }
 
 function arrival(d, e){
@@ -116,7 +133,8 @@ function left(a, b){
     var e =  parseInt(a.substr(3, 2)) * 60;
 
     var start = d + e;
-    var end = moment().unix();;
+    var end = moment().unix();
+    var min = (inter - ( end - start ) % inter) / 60;
 
-    return Math.ceil((inter - ( end - start ) % inter) / 60);
+    return min;
 }
