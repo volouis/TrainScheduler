@@ -59,8 +59,6 @@ $(document).on("click","button.update",function(){
     var row = $(this).attr("data-row");
     upKey = keys[row];
     upRow = $(this).attr("data-row");
-
-    $(".upName").append("<p>" + database.ref().val());
 });
 
 $("#upSubmit").click(function(event){
@@ -110,9 +108,6 @@ function rowCreating(name, place, tim, inter){
     row.append("<td>" + inter);
 
     var timeLeft = Math.ceil(left(tim, inter));
-    // var timeLeft = left(tim, inter);
-
-
     row.append("<td>" + arrival(tim, inter)); 
     row.append("<td>" + timeLeft); 
     row.append(con);
